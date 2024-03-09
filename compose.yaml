@@ -1,0 +1,32 @@
+version: "3.5"
+services:
+  mongo:
+    image: mongo:latest
+    environment:
+      MONGO_INITDB_ROOT_USERNAME:
+      MONGO_INITDB_ROOT_PASSWORD:
+    ports:
+      - "27018:27017"
+    networks:
+      - go-mongo
+    healthcheck:
+      test: echo 'db.runCommand("ping").ok' | mongosh localhost:27017/testing --quiet
+  mongo-seed:
+    image: mongo:latest
+    restart: no
+    environment:
+      MONGO_HOSTNAME: 'mongo'
+      MONGO_DBNAME: 'testing'
+    volumes:
+      - ./db/mongo/:/mongo-seed/
+    command: |
+      bash /mongo-seed/mongo_seed.sh
+    depends_on:
+      - mongo
+    networks:
+      - go-mongo
+
+networks:
+  go-mongo: {}
+
+
